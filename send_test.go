@@ -3,6 +3,7 @@ package gomail
 import (
 	"bytes"
 	"io"
+	"net/textproto"
 	"reflect"
 	"testing"
 )
@@ -56,6 +57,30 @@ func TestSend(t *testing.T) {
 	}
 	if err := Send(s, getTestMessage()); err != nil {
 		t.Errorf("Send(): %v", err)
+	}
+}
+
+func TestSendError(t *testing.T) {
+	expected := &textproto.Error{
+		Code: 400,
+		Msg:  "Error",
+	}
+
+	s := &mockSendCloser{
+		mockSender: func(from string, to []string, msg io.WriterTo) error {
+			return expected
+		},
+	}
+	err := Send(s, getTestMessage())
+	if err == nil {
+		t.Errorf("Expected error in Send(): %v", err)
+	}
+	if got, ok := err.(*textproto.Error); ok {
+		if !reflect.DeepEqual(got, expected) {
+			t.Errorf("Invalid error received in Send(). Expected %v Got %v", expected, got)
+		}
+	} else {
+		t.Errorf("Invalid error type in Send(): %v", err)
 	}
 }
 
