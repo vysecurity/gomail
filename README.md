@@ -1,5 +1,5 @@
 # Gomail
-[![Build Status](https://travis-ci.org/gophish/gomail.svg?branch=v2)](https://travis-ci.org/gophish/gomail) [![Documentation](https://godoc.org/gophish/gomail.v2?status.svg)](https://godoc.org/gophish/gomail.v2)
+[![Build Status](https://travis-ci.org/gophish/gomail.svg)](https://travis-ci.org/gophish/gomail) [![Documentation](https://godoc.org/github.com/gophish/gomail?status.svg)](https://godoc.org/github.com/gophish/gomail)
 
 ## Introduction
 
@@ -29,17 +29,17 @@ Gomail supports:
 
 ## Documentation
 
-https://godoc.org/gopkg.in/gomail.v2
+https://godoc.org/github.com/gophish/gomail
 
 
 ## Download
 
-    go get gopkg.in/gomail.v2
+    go get github.com/gophish/gomail
 
 
 ## Examples
 
-See the [examples in the documentation](https://godoc.org/gopkg.in/gomail.v2#example-package).
+See the [examples in the documentation](https://godoc.org/github.com/gophish/gomail#example-package).
 
 
 ## FAQ
@@ -56,7 +56,7 @@ bypass the verification of the server's certificate chain and host name by using
     import (
     	"crypto/tls"
 
-    	"gopkg.in/gomail.v2"
+    	"github.com/gophish/gomail"
     )
 
     func main() {
@@ -83,10 +83,3 @@ See [CHANGELOG.md](CHANGELOG.md).
 ## License
 
 [MIT](LICENSE)
-
-
-## Contact
-
-You can ask questions on the [Gomail
-thread](https://groups.google.com/d/topic/golang-nuts/jMxZHzvvEVg/discussion)
-in the Go mailing-list.
