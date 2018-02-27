@@ -33,28 +33,24 @@ func (f SendFunc) Send(from string, to []string, msg io.WriterTo) error {
 	return f(from, to, msg)
 }
 
-// Send sends emails using the given Sender.
-func Send(s Sender, msg ...*Message) error {
+// Send emails using the provided smtp_from emailaddress
+func Send(s Sender, smtp_from string, msg ...*Message) error {
 	for _, m := range msg {
-		if err := send(s, m); err != nil {
+		if err := send(s, smtp_from, m); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func send(s Sender, m *Message) error {
-	from, err := m.getFrom()
-	if err != nil {
-		return err
-	}
+func send(s Sender, smtp_from string, m *Message) error {
 
 	to, err := m.getRecipients()
 	if err != nil {
 		return err
 	}
 
-	if err := s.Send(from, to, m); err != nil {
+	if err := s.Send(smtp_from, to, m); err != nil {
 		return err
 	}
 
