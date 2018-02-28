@@ -12,6 +12,7 @@ import (
 // Send sends an email to the given addresses.
 type Sender interface {
 	Send(from string, to []string, msg io.WriterTo) error
+ 	sendCustomFrom(s Sender, smtp_from string, m *Message) error
 }
 
 // SendCloser is the interface that groups the Send and Close methods.
