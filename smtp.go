@@ -133,14 +133,7 @@ func (d *Dialer) DialAndSend(m ...*Message) error {
 		return err
 	}
 	defer s.Close()
-	// fetch the smtp-From from the first-email.. 
-	// todo: change the logic into something else 
-	smtp_from, err := m[0].getFrom()
-	if err != nil{
-	   return err
-   }
-
-	return Send(s, smtp_from, m...)
+	return Send(s, m...)
 }
 
 type smtpSender struct {
