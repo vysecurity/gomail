@@ -257,7 +257,7 @@ func testSendMailTimeout(t *testing.T, d *Dialer, want []string) {
 	doTestSendMail(t, d, want, true)
 }
 
-func doTestSMTPReset(t *testing.T, d *Dialer, want []string){
+func doTestSMTPReset(t *testing.T, d *Dialer, want []string) {
 	testClient := &mockClient{
 		t:       t,
 		want:    want,
@@ -298,9 +298,9 @@ func doTestSMTPReset(t *testing.T, d *Dialer, want []string){
 	}
 
 	/*
-	Call the reset for testing purposes. In practice, this should be called after an error while attempting to send
-	 a message. But per RFC 5321 RSET can be called at any time.
-	 */
+		Call the reset for testing purposes. In practice, this should be called after an error while attempting to send
+		 a message. But per RFC 5321 RSET can be called at any time.
+	*/
 	s.Reset()
 	s.Close()
 

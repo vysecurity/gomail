@@ -12,7 +12,7 @@ import (
 // Send sends an email to the given addresses.
 type Sender interface {
 	Send(from string, to []string, msg io.WriterTo) error
- 	sendCustomFrom(s Sender, smtp_from string, m *Message) error
+	sendCustomFrom(s Sender, smtp_from string, m *Message) error
 }
 
 // SendCloser is the interface that groups the Send and Close methods.
@@ -69,7 +69,7 @@ func Send(s Sender, msg ...*Message) error {
 func send(s Sender, m *Message) error {
 	from, err := m.getFrom()
 	if err != nil {
-			return err
+		return err
 	}
 
 	to, err := m.getRecipients()
