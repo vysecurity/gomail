@@ -133,6 +133,7 @@ func (d *Dialer) DialAndSend(m ...*Message) error {
 		return err
 	}
 	defer s.Close()
+
 	return Send(s, m...)
 }
 
