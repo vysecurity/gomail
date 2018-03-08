@@ -5,46 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/mail"
-	"math/rand"
-	"strings"
 )
 
 // Sender is the interface that wraps the Send method.
-
-
-
-func CreateRandomMessageId(email string) string {
-	const MessageIdLength = 20
-	// from https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-golang
-	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	const (
-		letterIdxBits = 6                    // 6 bits to represent a letter index
-		letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-		letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-	)
-
-	b := make([]byte, MessageIdLength)
-	// A rand.Int63() generates 63 random bits, enough for letterIdxMax letters!
-	for i, cache, remain := MessageIdLength-1, rand.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = rand.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
-	}
-
-	random_message_id := string(b)
-
-	components := strings.Split(email, "@")
-	_, domain := components[0], components[1]
-
-	return "<" + random_message_id + "@" + domain + ">"
-}
-
 //
 // Send sends an email to the given addresses.
 type Sender interface {
@@ -86,11 +49,6 @@ func sendCustomFrom(s Sender, smtp_from string, m *Message) error {
 		return err
 	}
 
-	if m.GetHeader("Message-Id") == nil{
-		message_id := CreateRandomMessageId(smtp_from)
-		m.SetHeader("Message-Id", message_id)
-	}
-
 	if err := s.Send(smtp_from, to, m); err != nil {
 		return err
 	}
@@ -116,11 +74,6 @@ func send(s Sender, m *Message) error {
 	to, err := m.getRecipients()
 	if err != nil {
 		return err
-	}
-
-	if m.GetHeader("Message-Id") == nil{
-		message_id := CreateRandomMessageId(from)
-		m.SetHeader("Message-Id", message_id)
 	}
 
 	if err := s.Send(from, to, m); err != nil {
