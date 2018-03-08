@@ -12,6 +12,7 @@ const (
 	testTo1  = "to1@example.com"
 	testTo2  = "to2@example.com"
 	testFrom = "from@example.com"
+	testAlternativeFrom = "from@evildomain.com"
 	testBody = "Test message"
 	testMsg  = "To: " + testTo1 + ", " + testTo2 + "\r\n" +
 		"From: " + testFrom + "\r\n" +
@@ -42,6 +43,24 @@ func (s *mockSendCloser) Close() error {
 func (s *mockSendCloser) Reset() error {
 	return s.reset()
 }
+
+func TestSendSpoof(t *testing.T) {
+	s := &mockSendCloser{
+		mockSender: stubSend(t, testAlternativeFrom, []string{testTo1, testTo2}, testMsg),
+		close: func() error {
+			t.Error("Close() should not be called in Send()")
+			return nil
+		},
+		reset: func() error {
+			t.Error("Reset() should not be called in Send()")
+			return nil
+		},
+	}
+	if err := SendCustomFrom(s, testAlternativeFrom, getTestMessage()); err != nil {
+		t.Errorf("Send(): %v", err)
+	}
+}
+
 
 func TestSend(t *testing.T) {
 	s := &mockSendCloser{
