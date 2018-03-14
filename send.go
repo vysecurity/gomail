@@ -33,7 +33,29 @@ func (f SendFunc) Send(from string, to []string, msg io.WriterTo) error {
 	return f(from, to, msg)
 }
 
-// Send sends emails using the given Sender.
+func SendCustomFrom(s Sender, smtp_from string, msg ...*Message) error {
+	for _, m := range msg {
+		if err := sendCustomFrom(s, smtp_from, m); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func sendCustomFrom(s Sender, smtp_from string, m *Message) error {
+
+	to, err := m.getRecipients()
+	if err != nil {
+		return err
+	}
+
+	if err := s.Send(smtp_from, to, m); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func Send(s Sender, msg ...*Message) error {
 	for _, m := range msg {
 		if err := send(s, m); err != nil {
