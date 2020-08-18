@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+var defaultDialer = &net.Dialer{
+	Timeout:   10 * time.Second,
+	KeepAlive: 30 * time.Second,
+}
+
 // A Dialer is a dialer to an SMTP server.
 type Dialer struct {
 	// Host represents the host of the SMTP server.
@@ -33,12 +38,27 @@ type Dialer struct {
 	// LocalName is the hostname sent to the SMTP server with the HELO command.
 	// By default, "localhost" is sent.
 	LocalName string
+
+	dialer netDialer
+}
+
+// NewWithDialer returns a new SMTP Dialer configured with the provided net.Dialer.
+func NewWithDialer(dialer *net.Dialer, host string, port int, username, password string) *Dialer {
+	return &Dialer{
+		dialer:   dialer,
+		Host:     host,
+		Port:     port,
+		Username: username,
+		Password: password,
+		SSL:      port == 465,
+	}
 }
 
 // NewDialer returns a new SMTP Dialer. The given parameters are used to connect
 // to the SMTP server.
 func NewDialer(host string, port int, username, password string) *Dialer {
 	return &Dialer{
+		dialer:   defaultDialer,
 		Host:     host,
 		Port:     port,
 		Username: username,
@@ -58,7 +78,10 @@ func NewPlainDialer(host string, port int, username, password string) *Dialer {
 // Dial dials and authenticates to an SMTP server. The returned SendCloser
 // should be closed when done using it.
 func (d *Dialer) Dial() (SendCloser, error) {
-	conn, err := netDialTimeout("tcp", addr(d.Host, d.Port), 10*time.Second)
+	if d.dialer == nil {
+		d.dialer = defaultDialer
+	}
+	conn, err := d.dialer.Dial("tcp", addr(d.Host, d.Port))
 	if err != nil {
 		return nil, err
 	}
@@ -184,11 +207,14 @@ func (c *smtpSender) Reset() error {
 	return c.smtpClient.Reset()
 }
 
+type netDialer interface {
+	Dial(network, address string) (net.Conn, error)
+}
+
 // Stubbed out for tests.
 var (
-	netDialTimeout = net.DialTimeout
-	tlsClient      = tls.Client
-	smtpNewClient  = func(conn net.Conn, host string) (smtpClient, error) {
+	tlsClient     = tls.Client
+	smtpNewClient = func(conn net.Conn, host string) (smtpClient, error) {
 		return smtp.NewClient(conn, host)
 	}
 )

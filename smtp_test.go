@@ -8,7 +8,6 @@ import (
 	"net/smtp"
 	"reflect"
 	"testing"
-	"time"
 )
 
 const (
@@ -22,6 +21,14 @@ var (
 	testConfig  = &tls.Config{InsecureSkipVerify: true}
 	testAuth    = smtp.PlainAuth("", testUser, testPwd, testHost)
 )
+
+type mockNetDialer struct {
+	dial func(network, address string) (net.Conn, error)
+}
+
+func (md *mockNetDialer) Dial(network, address string) (net.Conn, error) {
+	return md.dial(network, address)
+}
 
 func TestDialer(t *testing.T) {
 	d := NewDialer(testHost, testPort, "user", "pwd")
@@ -266,16 +273,19 @@ func doTestSMTPReset(t *testing.T, d *Dialer, want []string) {
 		timeout: false,
 	}
 
-	netDialTimeout = func(network, address string, d time.Duration) (net.Conn, error) {
-		if network != "tcp" {
-			t.Errorf("Invalid network, got %q, want tcp", network)
-		}
-		if address != testClient.addr {
-			t.Errorf("Invalid address, got %q, want %q",
-				address, testClient.addr)
-		}
-		return testConn, nil
+	dialer := &mockNetDialer{
+		dial: func(network, address string) (net.Conn, error) {
+			if network != "tcp" {
+				t.Errorf("Invalid network, got %q, want tcp", network)
+			}
+			if address != testClient.addr {
+				t.Errorf("Invalid address, got %q, want %q",
+					address, testClient.addr)
+			}
+			return testConn, nil
+		},
 	}
+	d.dialer = dialer
 
 	tlsClient = func(conn net.Conn, config *tls.Config) *tls.Conn {
 		if conn != testConn {
@@ -315,16 +325,19 @@ func doTestSendMail(t *testing.T, d *Dialer, want []string, timeout bool) {
 		timeout: timeout,
 	}
 
-	netDialTimeout = func(network, address string, d time.Duration) (net.Conn, error) {
-		if network != "tcp" {
-			t.Errorf("Invalid network, got %q, want tcp", network)
-		}
-		if address != testClient.addr {
-			t.Errorf("Invalid address, got %q, want %q",
-				address, testClient.addr)
-		}
-		return testConn, nil
+	dialer := &mockNetDialer{
+		dial: func(network, address string) (net.Conn, error) {
+			if network != "tcp" {
+				t.Errorf("Invalid network, got %q, want tcp", network)
+			}
+			if address != testClient.addr {
+				t.Errorf("Invalid address, got %q, want %q",
+					address, testClient.addr)
+			}
+			return testConn, nil
+		},
 	}
+	d.dialer = dialer
 
 	tlsClient = func(conn net.Conn, config *tls.Config) *tls.Conn {
 		if conn != testConn {
